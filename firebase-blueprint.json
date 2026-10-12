@@ -1,0 +1,50 @@
+{
+  "entities": {
+    "Activity": {
+      "title": "Activity",
+      "description": "Daily DPO activity and attendance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "centerId": { "type": "string" }
+      },
+      "required": ["id", "date", "centerId"]
+    },
+    "Employee": {
+      "title": "Employee",
+      "description": "Employee roster",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "employeeCode": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["id", "employeeCode", "name"]
+    },
+    "Commitment": {
+      "title": "Commitment",
+      "description": "DPO commitments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" }
+      },
+      "required": ["id"]
+    }
+  },
+  "firestore": {
+    "/activities/{activityId}": {
+      "schema": "Activity",
+      "description": "Activities collection"
+    },
+    "/employees/{employeeId}": {
+      "schema": "Employee",
+      "description": "Employees collection"
+    },
+    "/commitments/{commitmentId}": {
+      "schema": "Commitment",
+      "description": "Commitments collection"
+    }
+  }
+}
