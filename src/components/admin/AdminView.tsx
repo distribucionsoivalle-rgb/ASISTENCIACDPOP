@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { LogoModal } from '../common/LogoModal';
 import { BavariaLogo } from '../common/BavariaLogo';
-import { SupabaseSettingsCard } from './SupabaseSettingsCard';
+import { FirebaseSettingsCard } from './FirebaseSettingsCard';
 
 interface AdminViewProps {
   currentUser: User;
@@ -490,7 +490,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
       {/* PESTAÑA 3: Base de Datos y Respaldos */}
       {activeTab === 'backup' && (
         <div className="space-y-6">
-          <SupabaseSettingsCard onNotification={showNotification} />
+          <FirebaseSettingsCard onNotification={showNotification} />
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5 space-y-5 text-xs">
             <div>

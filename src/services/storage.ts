@@ -6,6 +6,8 @@ import {
   SystemSettings,
   User,
 } from '../types';
+import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { db } from './firebaseClient';
 
 const STORAGE_KEYS = {
   ACTIVITIES: 'bavaria_matinal_activities_v2',
@@ -36,22 +38,22 @@ export const DEFAULT_USERS: User[] = [
 ];
 
 export const DEFAULT_SETTINGS: SystemSettings = {
-  excludeJustifiedFromPercentage: false, // Por defecto se incluye en el denominador según regla oficial DPO
+  excludeJustifiedFromPercentage: false,
   defaultCenterId: 'cd-cali',
   companyName: 'Bavaria & CIA S.C.A.',
   departmentName: 'Gerencia de Distribución y Logística - Pilar DPO',
 };
 
 export const INITIAL_EMPLOYEES: EmployeeRoster[] = [];
-
 export const INITIAL_COMMITMENTS: DPOCommitment[] = [];
-
 export const INITIAL_ACTIVITIES: Activity[] = [];
 
 class StorageService {
+  private isSyncingFromFirestore = false;
+
   constructor() {
     try {
-      const clearedKey = 'bavaria_cleared_v5';
+      const clearedKey = 'bavaria_cleared_v6';
       if (!localStorage.getItem(clearedKey)) {
         localStorage.removeItem(STORAGE_KEYS.ACTIVITIES);
         localStorage.removeItem(STORAGE_KEYS.EMPLOYEES);
@@ -60,6 +62,45 @@ class StorageService {
       }
     } catch (e) {
       // ignore
+    }
+
+    // Trigger background sync from Firestore
+    this.fetchFromFirestoreAsync();
+  }
+
+  private async fetchFromFirestoreAsync() {
+    if (this.isSyncingFromFirestore) return;
+    this.isSyncingFromFirestore = true;
+    try {
+      if (!db) return;
+
+      // Fetch activities
+      const actSnap = await getDocs(collection(db, 'activities'));
+      if (!actSnap.empty) {
+        const remoteActivities: Activity[] = [];
+        actSnap.forEach((d) => remoteActivities.push(d.data() as Activity));
+        this.setStorageItem(STORAGE_KEYS.ACTIVITIES, remoteActivities);
+      }
+
+      // Fetch employees
+      const empSnap = await getDocs(collection(db, 'employees'));
+      if (!empSnap.empty) {
+        const remoteEmployees: EmployeeRoster[] = [];
+        empSnap.forEach((d) => remoteEmployees.push(d.data() as EmployeeRoster));
+        this.setStorageItem(STORAGE_KEYS.EMPLOYEES, remoteEmployees);
+      }
+
+      // Fetch commitments
+      const comSnap = await getDocs(collection(db, 'commitments'));
+      if (!comSnap.empty) {
+        const remoteCommitments: DPOCommitment[] = [];
+        comSnap.forEach((d) => remoteCommitments.push(d.data() as DPOCommitment));
+        this.setStorageItem(STORAGE_KEYS.COMMITMENTS, remoteCommitments);
+      }
+    } catch (e) {
+      console.warn('Error syncing from Firestore (offline or uninitialized):', e);
+    } finally {
+      this.isSyncingFromFirestore = false;
     }
   }
 
@@ -116,7 +157,6 @@ class StorageService {
   }
 
   saveActivity(activity: Activity): { success: boolean; message: string; activity?: Activity } {
-    // Validación de duplicados de empleados en la misma actividad
     const employeeIds = new Set<string>();
     for (const att of activity.attendees) {
       const code = att.employeeCode.trim().toLowerCase();
@@ -132,26 +172,38 @@ class StorageService {
     const activities = this.getActivities();
     const existingIndex = activities.findIndex(a => a.id === activity.id);
 
+    const savedActivity: Activity = existingIndex >= 0
+      ? { ...activity, updatedAt: new Date().toISOString() }
+      : { ...activity, id: activity.id || `act-${Date.now()}`, createdAt: new Date().toISOString() };
+
     if (existingIndex >= 0) {
-      activities[existingIndex] = {
-        ...activity,
-        updatedAt: new Date().toISOString(),
-      };
+      activities[existingIndex] = savedActivity;
     } else {
-      activities.unshift({
-        ...activity,
-        id: activity.id || `act-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      });
+      activities.unshift(savedActivity);
     }
 
     this.setStorageItem(STORAGE_KEYS.ACTIVITIES, activities);
-    return { success: true, message: 'Actividad guardada exitosamente', activity };
+
+    // Sync to Firestore
+    if (db) {
+      setDoc(doc(db, 'activities', savedActivity.id), savedActivity).catch(err => {
+        console.error('Error saving activity to Firestore:', err);
+      });
+    }
+
+    return { success: true, message: 'Actividad guardada exitosamente en la base de datos', activity: savedActivity };
   }
 
   deleteActivity(id: string): boolean {
     const activities = this.getActivities().filter(a => a.id !== id);
     this.setStorageItem(STORAGE_KEYS.ACTIVITIES, activities);
+
+    if (db) {
+      deleteDoc(doc(db, 'activities', id)).catch(err => {
+        console.error('Error deleting activity from Firestore:', err);
+      });
+    }
+
     return true;
   }
 
@@ -159,36 +211,13 @@ class StorageService {
   getEmployees(): EmployeeRoster[] {
     const employees = this.getStorageItem<EmployeeRoster[]>(STORAGE_KEYS.EMPLOYEES, []);
     if (!employees || employees.length === 0) {
-      this.setStorageItem(STORAGE_KEYS.EMPLOYEES, INITIAL_EMPLOYEES);
       return INITIAL_EMPLOYEES;
-    }
-    const validIds = new Set(['cd-popayan', 'cd-cali', 'cd-tulua', 'cd-yumbo']);
-    const legacyMap: Record<string, string> = {
-      'cd-valle': 'cd-yumbo',
-      'cd-tocancipa': 'cd-popayan',
-      'cd-bucaramanga': 'cd-tulua',
-      'cd-barranquilla': 'cd-cali',
-      'cd-medellin': 'cd-cali',
-      'cd-bogota-fon': 'cd-yumbo',
-    };
-    let hasChanges = false;
-    const normalized = employees.map((emp) => {
-      if (!validIds.has(emp.centerId)) {
-        hasChanges = true;
-        return { ...emp, centerId: legacyMap[emp.centerId] || 'cd-cali' };
-      }
-      return emp;
-    });
-    if (hasChanges) {
-      this.setStorageItem(STORAGE_KEYS.EMPLOYEES, normalized);
-      return normalized;
     }
     return employees;
   }
 
   saveEmployee(employee: EmployeeRoster): { success: boolean; message: string } {
     const employees = this.getEmployees();
-    // Validar código duplicado
     const duplicate = employees.find(
       e => e.employeeCode === employee.employeeCode && e.id !== employee.id
     );
@@ -199,29 +228,43 @@ class StorageService {
       };
     }
 
-    const index = employees.findIndex(e => e.id === employee.id);
+    const savedEmp = {
+      ...employee,
+      id: employee.id || `emp-${Date.now()}`,
+    };
+
+    const index = employees.findIndex(e => e.id === savedEmp.id);
     if (index >= 0) {
-      employees[index] = employee;
+      employees[index] = savedEmp;
     } else {
-      employees.push({
-        ...employee,
-        id: employee.id || `emp-${Date.now()}`,
-      });
+      employees.push(savedEmp);
     }
     this.setStorageItem(STORAGE_KEYS.EMPLOYEES, employees);
-    return { success: true, message: 'Empleado registrado exitosamente' };
+
+    if (db) {
+      setDoc(doc(db, 'employees', savedEmp.id), savedEmp).catch(err => {
+        console.error('Error saving employee to Firestore:', err);
+      });
+    }
+
+    return { success: true, message: 'Empleado registrado exitosamente en la base de datos' };
   }
 
   deleteEmployee(id: string): void {
     const employees = this.getEmployees().filter(e => e.id !== id);
     this.setStorageItem(STORAGE_KEYS.EMPLOYEES, employees);
+
+    if (db) {
+      deleteDoc(doc(db, 'employees', id)).catch(err => {
+        console.error('Error deleting employee from Firestore:', err);
+      });
+    }
   }
 
   // Compromisos DPO
   getCommitments(): DPOCommitment[] {
     const commitments = this.getStorageItem<DPOCommitment[]>(STORAGE_KEYS.COMMITMENTS, []);
     if (!commitments || commitments.length === 0) {
-      this.setStorageItem(STORAGE_KEYS.COMMITMENTS, INITIAL_COMMITMENTS);
       return INITIAL_COMMITMENTS;
     }
     return commitments;
@@ -230,27 +273,36 @@ class StorageService {
   saveCommitment(commitment: DPOCommitment): void {
     const commitments = this.getCommitments();
     const index = commitments.findIndex(c => c.id === commitment.id);
+    const savedCom: DPOCommitment = index >= 0
+      ? { ...commitment, updatedAt: new Date().toISOString() }
+      : { ...commitment, id: commitment.id || `com-${Date.now()}`, createdAt: new Date().toISOString() };
+
     if (index >= 0) {
-      commitments[index] = {
-        ...commitment,
-        updatedAt: new Date().toISOString(),
-      };
+      commitments[index] = savedCom;
     } else {
-      commitments.unshift({
-        ...commitment,
-        id: commitment.id || `com-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      });
+      commitments.unshift(savedCom);
     }
     this.setStorageItem(STORAGE_KEYS.COMMITMENTS, commitments);
+
+    if (db) {
+      setDoc(doc(db, 'commitments', savedCom.id), savedCom).catch(err => {
+        console.error('Error saving commitment to Firestore:', err);
+      });
+    }
   }
 
   deleteCommitment(id: string): void {
     const commitments = this.getCommitments().filter(c => c.id !== id);
     this.setStorageItem(STORAGE_KEYS.COMMITMENTS, commitments);
+
+    if (db) {
+      deleteDoc(doc(db, 'commitments', id)).catch(err => {
+        console.error('Error deleting commitment from Firestore:', err);
+      });
+    }
   }
 
-  // Auto-registro de asistencia por colaborador (Kiosco / Móvil)
+  // Auto-registro de asistencia por colaborador
   registerSelfAttendance(params: {
     employeeCode: string;
     cargo: import('../types').Cargo;
@@ -271,7 +323,6 @@ class StorageService {
       return { success: false, message: 'El número de cédula es obligatorio.' };
     }
 
-    // Hora automática en formato HH:mm y HH:mm:ss (hora de Colombia)
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -279,18 +330,15 @@ class StorageService {
     const recordedTime = `${hours}:${minutes}`;
     const detailedTime = `${hours}:${minutes}:${seconds}`;
 
-    // Fecha actual YYYY-MM-DD
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const todayDate = `${year}-${month}-${day}`;
 
-    // Buscar si existe en nómina
     const employees = this.getEmployees();
     const foundEmp = employees.find(e => e.employeeCode.trim() === code);
     const resolvedName = params.fullName?.trim() || foundEmp?.name || `Colaborador CC ${code}`;
 
-    // Si es nuevo y se suministró nombre, guardarlo en nómina para agilizar futuros registros
     if (!foundEmp && params.fullName?.trim()) {
       this.saveEmployee({
         id: `emp-${Date.now()}`,
@@ -302,13 +350,11 @@ class StorageService {
       });
     }
 
-    // Buscar actividad activa de hoy para este Centro o la especificada
     const activities = this.getActivities();
     let targetActivity = params.activityId
       ? activities.find(a => a.id === params.activityId)
       : activities.find(a => a.date === todayDate && a.centerId === params.centerId);
 
-    // Si no existe actividad para hoy en ese CD, crear la matinal del día automáticamente
     if (!targetActivity) {
       targetActivity = {
         id: `act-${Date.now()}`,
@@ -327,7 +373,6 @@ class StorageService {
       activities.unshift(targetActivity);
     }
 
-    // Validar duplicado en esta actividad
     const existingAttendee = targetActivity.attendees.find(
       a => a.employeeCode.trim() === code
     );
@@ -343,7 +388,6 @@ class StorageService {
       };
     }
 
-    // Registrar nuevo asistente con hora automática del sistema
     const newAttendee: import('../types').Attendee = {
       id: `att-self-${Date.now()}`,
       employeeCode: code,
@@ -358,11 +402,11 @@ class StorageService {
     targetActivity.updatedAt = new Date().toISOString();
     targetActivity.updatedBy = 'Auto-registro Colaborador';
 
-    this.setStorageItem(STORAGE_KEYS.ACTIVITIES, activities);
+    this.saveActivity(targetActivity);
 
     return {
       success: true,
-      message: `¡Asistencia registrada con éxito! Bienvenido ${resolvedName}.`,
+      message: `¡Asistencia registrada con éxito en la base de datos! Bienvenido ${resolvedName}.`,
       attendee: newAttendee,
       activity: targetActivity,
       recordedTime: detailedTime,
@@ -399,7 +443,7 @@ class StorageService {
     this.setStorageItem(STORAGE_KEYS.CURRENT_USER, DEFAULT_USERS[0]);
   }
 
-  // Vaciar todos los datos y registros demo
+  // Vaciar todos los datos y registros
   clearAllData(): void {
     this.setStorageItem(STORAGE_KEYS.ACTIVITIES, []);
     this.setStorageItem(STORAGE_KEYS.COMMITMENTS, []);
@@ -416,11 +460,10 @@ class StorageService {
     } else {
       localStorage.removeItem(STORAGE_KEYS.CUSTOM_LOGO);
     }
-    // Disparar evento para sincronizar todos los componentes inmediatamente
     window.dispatchEvent(new CustomEvent('bavaria_logo_updated', { detail: logoDataUrl }));
   }
 
-  // Exportar todo el backup JSON
+  // Exportar backup JSON
   exportBackupJson(): string {
     const backup = {
       version: '1.0',
@@ -438,12 +481,33 @@ class StorageService {
   importBackupJson(jsonString: string): { success: boolean; message: string } {
     try {
       const data = JSON.parse(jsonString);
-      if (Array.isArray(data.activities)) this.setStorageItem(STORAGE_KEYS.ACTIVITIES, data.activities);
-      if (Array.isArray(data.commitments)) this.setStorageItem(STORAGE_KEYS.COMMITMENTS, data.commitments);
-      if (Array.isArray(data.employees)) this.setStorageItem(STORAGE_KEYS.EMPLOYEES, data.employees);
+      if (Array.isArray(data.activities)) {
+        this.setStorageItem(STORAGE_KEYS.ACTIVITIES, data.activities);
+        if (db) {
+          data.activities.forEach((act: Activity) => {
+            setDoc(doc(db, 'activities', act.id), act).catch(() => {});
+          });
+        }
+      }
+      if (Array.isArray(data.commitments)) {
+        this.setStorageItem(STORAGE_KEYS.COMMITMENTS, data.commitments);
+        if (db) {
+          data.commitments.forEach((com: DPOCommitment) => {
+            setDoc(doc(db, 'commitments', com.id), com).catch(() => {});
+          });
+        }
+      }
+      if (Array.isArray(data.employees)) {
+        this.setStorageItem(STORAGE_KEYS.EMPLOYEES, data.employees);
+        if (db) {
+          data.employees.forEach((emp: EmployeeRoster) => {
+            setDoc(doc(db, 'employees', emp.id), emp).catch(() => {});
+          });
+        }
+      }
       if (Array.isArray(data.centers)) this.setStorageItem(STORAGE_KEYS.CENTERS, data.centers);
       if (data.settings) this.setStorageItem(STORAGE_KEYS.SETTINGS, data.settings);
-      return { success: true, message: 'Datos importados correctamente con éxito.' };
+      return { success: true, message: 'Datos importados correctamente y sincronizados con Firebase.' };
     } catch (e: any) {
       return { success: false, message: `Error al procesar el archivo JSON: ${e.message}` };
     }
