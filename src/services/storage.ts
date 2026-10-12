@@ -8,21 +8,20 @@ import {
 } from '../types';
 
 const STORAGE_KEYS = {
-  ACTIVITIES: 'bavaria_dpo_activities_v1',
-  COMMITMENTS: 'bavaria_dpo_commitments_v1',
-  EMPLOYEES: 'bavaria_dpo_employees_v1',
-  CENTERS: 'bavaria_dpo_centers_v1',
-  SETTINGS: 'bavaria_dpo_settings_v1',
-  CURRENT_USER: 'bavaria_dpo_current_user_v1',
+  ACTIVITIES: 'bavaria_matinal_activities_v2',
+  COMMITMENTS: 'bavaria_matinal_commitments_v2',
+  EMPLOYEES: 'bavaria_matinal_employees_v2',
+  CENTERS: 'bavaria_matinal_centers_v2',
+  SETTINGS: 'bavaria_matinal_settings_v2',
+  CURRENT_USER: 'bavaria_matinal_current_user_v2',
+  CUSTOM_LOGO: 'bavaria_matinal_custom_logo_v2',
 };
 
 export const DEFAULT_CENTERS: DistributionCenter[] = [
-  { id: 'cd-valle', code: 'CD-VAL', name: 'CD Valle (Yumbo)', city: 'Cali / Yumbo', address: 'Zona Industrial Acopi, Cl 15 #30-40' },
-  { id: 'cd-tocancipa', code: 'CD-TOC', name: 'CD Tocancipá', city: 'Tocancipá', address: 'Autopista Norte Km 28' },
-  { id: 'cd-bucaramanga', code: 'CD-BUC', name: 'CD Bucaramanga', city: 'Bucaramanga', address: 'Vía Girón Km 7' },
-  { id: 'cd-barranquilla', code: 'CD-BAQ', name: 'CD Barranquilla', city: 'Barranquilla', address: 'Vía 40 # 85-200' },
-  { id: 'cd-medellin', code: 'CD-MED', name: 'CD Medellín (Itagüí)', city: 'Itagüí / Medellín', address: 'Cra 42 # 54A-120' },
-  { id: 'cd-bogota-fon', code: 'CD-BOG', name: 'CD Fontibón (Bogotá)', city: 'Bogotá D.C.', address: 'Av. El Dorado # 106-25' },
+  { id: 'cd-popayan', code: 'CD-POP', name: 'CD Popayán', city: 'Popayán', address: 'Parque Industrial, Variante Norte' },
+  { id: 'cd-cali', code: 'CD-CAL', name: 'CD Cali', city: 'Cali', address: 'Carrera 8 # 52-40, Base Aérea' },
+  { id: 'cd-tulua', code: 'CD-TUL', name: 'CD Tuluá', city: 'Tuluá', address: 'Km 2 Vía Tuluá - Riofrío' },
+  { id: 'cd-yumbo', code: 'CD-YUM', name: 'CD Yumbo', city: 'Yumbo', address: 'Zona Industrial Acopi, Cl 15 # 30-40' },
 ];
 
 export const DEFAULT_USERS: User[] = [
@@ -31,8 +30,8 @@ export const DEFAULT_USERS: User[] = [
     name: 'Ing. Carlos Restrepo',
     email: 'distribucionsoivalle@gmail.com',
     role: 'admin',
-    roleTitle: 'Administrador DPO / Jefe de Distribución',
-    centerId: 'cd-valle',
+    roleTitle: 'Administrador DPO / Jefe de Distribución Regional',
+    centerId: 'cd-cali',
   },
   {
     id: 'user-registrador',
@@ -40,41 +39,48 @@ export const DEFAULT_USERS: User[] = [
     email: 'operaciones.valle@bavaria.co',
     role: 'registrador',
     roleTitle: 'Supervisor de Rutas / Facilitador Matinal',
-    centerId: 'cd-valle',
+    centerId: 'cd-yumbo',
   },
   {
     id: 'user-consulta',
     name: 'Dra. Paola Andrea Gil',
     email: 'auditor.dpo@bavaria.co',
     role: 'consulta',
-    roleTitle: 'Auditor Corporativo DPO (Solo Consulta)',
-    centerId: 'cd-valle',
+    roleTitle: 'Auditor Corporativo DPO Regional (Solo Consulta)',
+    centerId: 'cd-cali',
   },
 ];
 
 export const DEFAULT_SETTINGS: SystemSettings = {
-  excludeJustifiedFromPercentage: false, // Por defecto se incluye en el denominador según regla oficial
-  defaultCenterId: 'cd-valle',
+  excludeJustifiedFromPercentage: false, // Por defecto se incluye en el denominador según regla oficial DPO
+  defaultCenterId: 'cd-cali',
   companyName: 'Bavaria & CIA S.C.A.',
   departmentName: 'Gerencia de Distribución y Logística - Pilar DPO',
 };
 
 export const INITIAL_EMPLOYEES: EmployeeRoster[] = [
-  { id: 'emp-1', employeeCode: '1144023941', name: 'Carlos Alberto Mendoza', cargo: 'Conductor', centerId: 'cd-valle', active: true, phone: '3104529811' },
-  { id: 'emp-2', employeeCode: '1130654210', name: 'Andrés Felipe Rincón', cargo: 'Responsable de Ruta (RR)', centerId: 'cd-valle', active: true, phone: '3128904422' },
-  { id: 'emp-3', employeeCode: '1144189320', name: 'Jhonatan Valencia Hurtado', cargo: 'Auxiliar de reparto', centerId: 'cd-valle', active: true, phone: '3157210943' },
-  { id: 'emp-4', employeeCode: '1113645892', name: 'Brayan Stiven Ortiz', cargo: 'Conductor', centerId: 'cd-valle', active: true, phone: '3168923011' },
-  { id: 'emp-5', employeeCode: '1143890214', name: 'Héctor Fabio Caicedo', cargo: 'Responsable de Ruta (RR)', centerId: 'cd-valle', active: true, phone: '3206649102' },
-  { id: 'emp-6', employeeCode: '1144567801', name: 'Luis Fernando Mosquera', cargo: 'Auxiliar de reparto', centerId: 'cd-valle', active: true, phone: '3189901234' },
-  { id: 'emp-7', employeeCode: '1152438901', name: 'Mateo Zuluaga Echeverry', cargo: 'Auxiliar de reparto', centerId: 'cd-valle', active: true, phone: '3113459800' },
-  { id: 'emp-8', employeeCode: '31985472', name: 'Diana Marcela Gómez', cargo: 'Administrativo', centerId: 'cd-valle', active: true, phone: '3145672311' },
-  { id: 'emp-9', employeeCode: '1112456789', name: 'Víctor Manuel Quintero', cargo: 'Conductor', centerId: 'cd-valle', active: true, phone: '3174561234' },
-  { id: 'emp-10', employeeCode: '1144321980', name: 'José Daniel Palacios', cargo: 'Responsable de Ruta (RR)', centerId: 'cd-valle', active: true, phone: '3187654321' },
-  { id: 'emp-11', employeeCode: '1098765432', name: 'Jorge Iván Cárdenas', cargo: 'Conductor', centerId: 'cd-bucaramanga', active: true, phone: '3001234567' },
-  { id: 'emp-12', employeeCode: '1098654321', name: 'Sandra Milena Villamizar', cargo: 'Administrativo', centerId: 'cd-bucaramanga', active: true, phone: '3012345678' },
-  { id: 'emp-13', employeeCode: '1020304050', name: 'Yeison Alirio Parra', cargo: 'Responsable de Ruta (RR)', centerId: 'cd-tocancipa', active: true, phone: '3119876543' },
-  { id: 'emp-14', employeeCode: '1030405060', name: 'Wilson David Beltrán', cargo: 'Conductor', centerId: 'cd-tocancipa', active: true, phone: '3128765432' },
-  { id: 'emp-15', employeeCode: '1129543210', name: 'Gabriel Enrique Charry', cargo: 'Auxiliar de reparto', centerId: 'cd-barranquilla', active: true, phone: '3023456789' },
+  // CD Cali
+  { id: 'emp-1', employeeCode: '1144023941', name: 'Carlos Alberto Mendoza', cargo: 'Conductor', centerId: 'cd-cali', active: true, phone: '3104529811' },
+  { id: 'emp-2', employeeCode: '1130654210', name: 'Andrés Felipe Rincón', cargo: 'Responsable de Ruta (RR)', centerId: 'cd-cali', active: true, phone: '3128904422' },
+  { id: 'emp-3', employeeCode: '1144189320', name: 'Jhonatan Valencia Hurtado', cargo: 'Auxiliar de reparto', centerId: 'cd-cali', active: true, phone: '3157210943' },
+  { id: 'emp-8', employeeCode: '31985472', name: 'Diana Marcela Gómez', cargo: 'Administrativo', centerId: 'cd-cali', active: true, phone: '3145672311' },
+
+  // CD Yumbo
+  { id: 'emp-4', employeeCode: '1113645892', name: 'Brayan Stiven Ortiz', cargo: 'Conductor', centerId: 'cd-yumbo', active: true, phone: '3168923011' },
+  { id: 'emp-5', employeeCode: '1143890214', name: 'Héctor Fabio Caicedo', cargo: 'Responsable de Ruta (RR)', centerId: 'cd-yumbo', active: true, phone: '3206649102' },
+  { id: 'emp-6', employeeCode: '1144567801', name: 'Luis Fernando Mosquera', cargo: 'Auxiliar de reparto', centerId: 'cd-yumbo', active: true, phone: '3189901234' },
+  { id: 'emp-7', employeeCode: '1152438901', name: 'Mateo Zuluaga Echeverry', cargo: 'Auxiliar de reparto', centerId: 'cd-yumbo', active: true, phone: '3113459800' },
+
+  // CD Popayán
+  { id: 'emp-9', employeeCode: '1112456789', name: 'Víctor Manuel Quintero', cargo: 'Conductor', centerId: 'cd-popayan', active: true, phone: '3174561234' },
+  { id: 'emp-10', employeeCode: '1144321980', name: 'José Daniel Palacios', cargo: 'Responsable de Ruta (RR)', centerId: 'cd-popayan', active: true, phone: '3187654321' },
+  { id: 'emp-12', employeeCode: '1098654321', name: 'Sandra Milena Villamizar', cargo: 'Administrativo', centerId: 'cd-popayan', active: true, phone: '3012345678' },
+  { id: 'emp-15', employeeCode: '1129543210', name: 'Gabriel Enrique Charry', cargo: 'Auxiliar de reparto', centerId: 'cd-popayan', active: true, phone: '3023456789' },
+
+  // CD Tuluá
+  { id: 'emp-11', employeeCode: '1098765432', name: 'Jorge Iván Cárdenas', cargo: 'Conductor', centerId: 'cd-tulua', active: true, phone: '3001234567' },
+  { id: 'emp-13', employeeCode: '1020304050', name: 'Yeison Alirio Parra', cargo: 'Responsable de Ruta (RR)', centerId: 'cd-tulua', active: true, phone: '3119876543' },
+  { id: 'emp-14', employeeCode: '1030405060', name: 'Wilson David Beltrán', cargo: 'Conductor', centerId: 'cd-tulua', active: true, phone: '3128765432' },
 ];
 
 export const INITIAL_COMMITMENTS: DPOCommitment[] = [
@@ -84,7 +90,7 @@ export const INITIAL_COMMITMENTS: DPOCommitment[] = [
     topic: 'Desviación en el uso de calzado dieléctrico y guantes anticorte en bahía 3',
     action: 'Inspección previa 100% en salida de patio y reemplazo inmediato de EPP desgastados',
     responsible: 'Fabián Murillo (Supervisor de Rutas)',
-    centerId: 'cd-valle',
+    centerId: 'cd-yumbo',
     deadline: '2026-10-14',
     status: 'En proceso',
     createdAt: '2026-10-10T06:30:00Z',
@@ -96,37 +102,10 @@ export const INITIAL_COMMITMENTS: DPOCommitment[] = [
     topic: 'Demora de 15 minutos en el inicio de cargue de camiones T2 y T3',
     action: 'Sincronizar liberación de órdenes en SAP con el equipo de montacargas a las 05:30 am',
     responsible: 'Diana Marcela Gómez (Despachos)',
-    centerId: 'cd-valle',
+    centerId: 'cd-cali',
     deadline: '2026-10-09',
-    status: 'Pendiente', // Vencido para probar alertas
-    createdAt: '2026-10-06T06:15:00Z',
-    createdBy: 'Ing. Carlos Restrepo',
-  },
-  {
-    id: 'com-3',
-    activityId: 'act-3',
-    topic: 'Alineación de protocolo DPO de Cero Alcohol y prueba de alcohosensor aleatoria',
-    action: 'Realizar calibración mensual del equipo de alcoholemia y archivar certificados de trazabilidad',
-    responsible: 'Seguridad y Salud en el Trabajo (SST)',
-    centerId: 'cd-valle',
-    deadline: '2026-10-05',
-    status: 'Cerrado',
-    closureEvidence: 'Certificado de calibración N° 4589 recibido de metrología. Equipo operativo al 100%.',
-    closedAt: '2026-10-05T14:00:00Z',
-    closedBy: 'Ing. Carlos Restrepo',
-    createdAt: '2026-10-01T07:00:00Z',
-    createdBy: 'Fabián Murillo',
-  },
-  {
-    id: 'com-4',
-    activityId: 'act-4',
-    topic: 'Actualización obligatoria en manejo defensivo y puntos ciegos en vehículos pesados',
-    action: 'Programar sesión práctica en pista para los 8 conductores con alertas de telemetría',
-    responsible: 'Carlos Alberto Mendoza (Capacitador Flota)',
-    centerId: 'cd-valle',
-    deadline: '2026-10-18',
     status: 'Pendiente',
-    createdAt: '2026-10-11T08:00:00Z',
+    createdAt: '2026-10-06T06:15:00Z',
     createdBy: 'Ing. Carlos Restrepo',
   },
 ];
@@ -137,97 +116,73 @@ export const INITIAL_ACTIVITIES: Activity[] = [
     date: '2026-10-12',
     scheduledStartTime: '06:00',
     actualStartTime: '06:05',
-    centerId: 'cd-valle',
+    centerId: 'cd-cali',
     activityType: 'Matinal',
     topic: 'Matinal Operativa DPO: Indicadores de Rotura en Ruta y Seguridad Vial',
-    facilitator: 'Fabián Murillo',
-    generalNotes: 'Se revisó la meta semanal de rotura (<0.08%). Buen compromiso de las tripulaciones de reparto zona norte.',
-    createdBy: 'Fabián Murillo',
+    facilitator: 'Ing. Carlos Restrepo',
+    generalNotes: 'Se revisó la meta semanal de rotura (<0.08%). Buen compromiso de las tripulaciones de reparto zona norte Cali.',
+    createdBy: 'Ing. Carlos Restrepo',
     createdAt: '2026-10-12T06:25:00Z',
     attendees: [
       { id: 'att-1-1', employeeCode: '1144023941', name: 'Carlos Alberto Mendoza', cargo: 'Conductor', status: 'Asistió', arrivalTime: '05:55', observations: 'Puntual' },
       { id: 'att-1-2', employeeCode: '1130654210', name: 'Andrés Felipe Rincón', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '05:58', observations: 'Llegada con checklist listo' },
       { id: 'att-1-3', employeeCode: '1144189320', name: 'Jhonatan Valencia Hurtado', cargo: 'Auxiliar de reparto', status: 'Asistió', arrivalTime: '06:02', observations: 'Sin novedad' },
-      { id: 'att-1-4', employeeCode: '1113645892', name: 'Brayan Stiven Ortiz', cargo: 'Conductor', status: 'Asistió', arrivalTime: '05:50', observations: 'Inspección de vehículo OK' },
-      { id: 'att-1-5', employeeCode: '1143890214', name: 'Héctor Fabio Caicedo', cargo: 'Responsable de Ruta (RR)', status: 'Ausente', arrivalTime: '', observations: 'Sin aviso previo a supervisor' },
-      { id: 'att-1-6', employeeCode: '1144567801', name: 'Luis Fernando Mosquera', cargo: 'Auxiliar de reparto', status: 'Justificado', arrivalTime: '', observations: 'Incapacidad médica EPS radicada' },
-      { id: 'att-1-7', employeeCode: '1152438901', name: 'Mateo Zuluaga Echeverry', cargo: 'Auxiliar de reparto', status: 'Asistió', arrivalTime: '06:04', observations: 'EPP completos' },
       { id: 'att-1-8', employeeCode: '31985472', name: 'Diana Marcela Gómez', cargo: 'Administrativo', status: 'Asistió', arrivalTime: '05:50', observations: 'Acompañamiento DPO' },
     ],
   },
   {
     id: 'act-2',
-    date: '2026-10-11',
-    scheduledStartTime: '07:30',
-    actualStartTime: '07:30',
-    centerId: 'cd-valle',
-    activityType: 'Capacitación',
-    topic: 'Capacitación Técnica: Estándares DPO de Ergonomía y Manipulación de Canastillas',
-    facilitator: 'Ing. Carlos Restrepo',
-    generalNotes: 'Capacitación teórica y práctica en patio de distribución. Demostración de técnica de levantamiento con 2 personas.',
-    createdBy: 'Ing. Carlos Restrepo',
-    createdAt: '2026-10-11T09:00:00Z',
+    date: '2026-10-12',
+    scheduledStartTime: '06:00',
+    actualStartTime: '06:02',
+    centerId: 'cd-yumbo',
+    activityType: 'Matinal',
+    topic: 'Matinal Operativa DPO: Estándar de Apilamiento y Maniobras Seguras en Patio Acopi',
+    facilitator: 'Fabián Murillo',
+    generalNotes: 'Revisión de zonas de giro y velocidad máxima de 10 km/h en patio interno.',
+    createdBy: 'Fabián Murillo',
+    createdAt: '2026-10-12T06:20:00Z',
     attendees: [
-      { id: 'att-2-1', employeeCode: '1144023941', name: 'Carlos Alberto Mendoza', cargo: 'Conductor', status: 'Asistió', arrivalTime: '07:25', observations: 'Aprobó evaluación práctica' },
-      { id: 'att-2-2', employeeCode: '1130654210', name: 'Andrés Felipe Rincón', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '07:28', observations: 'Participativo' },
-      { id: 'att-2-3', employeeCode: '1144189320', name: 'Jhonatan Valencia Hurtado', cargo: 'Auxiliar de reparto', status: 'Asistió', arrivalTime: '07:30', observations: 'Aprobó evaluación' },
-      { id: 'att-2-4', employeeCode: '1113645892', name: 'Brayan Stiven Ortiz', cargo: 'Conductor', status: 'Asistió', arrivalTime: '07:20', observations: 'Excelente técnica ergonómica' },
-      { id: 'att-2-5', employeeCode: '1143890214', name: 'Héctor Fabio Caicedo', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '07:29', observations: 'Reintegro de turno' },
-      { id: 'att-2-6', employeeCode: '1152438901', name: 'Mateo Zuluaga Echeverry', cargo: 'Auxiliar de reparto', status: 'Asistió', arrivalTime: '07:25', observations: 'Aprobó evaluación' },
-      { id: 'att-2-7', employeeCode: '1112456789', name: 'Víctor Manuel Quintero', cargo: 'Conductor', status: 'Ausente', arrivalTime: '', observations: 'Ruta foránea en tránsito' },
+      { id: 'att-2-1', employeeCode: '1113645892', name: 'Brayan Stiven Ortiz', cargo: 'Conductor', status: 'Asistió', arrivalTime: '05:50', observations: 'Inspección de vehículo OK' },
+      { id: 'att-2-2', employeeCode: '1143890214', name: 'Héctor Fabio Caicedo', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '05:58', observations: 'Puntual' },
+      { id: 'att-2-3', employeeCode: '1144567801', name: 'Luis Fernando Mosquera', cargo: 'Auxiliar de reparto', status: 'Asistió', arrivalTime: '06:01', observations: 'EPP completos' },
+      { id: 'att-2-4', employeeCode: '1152438901', name: 'Mateo Zuluaga Echeverry', cargo: 'Auxiliar de reparto', status: 'Asistió', arrivalTime: '06:00', observations: 'EPP completos' },
     ],
   },
   {
     id: 'act-3',
-    date: '2026-10-09',
-    scheduledStartTime: '06:00',
-    actualStartTime: '06:12',
-    centerId: 'cd-valle',
-    activityType: 'Reunión DPO',
-    topic: 'Comité de Pilar Warehouse y Distribución: Análisis de Pérdidas y Tiempos de Ciclo',
-    facilitator: 'Ing. Carlos Restrepo',
-    generalNotes: 'Evaluación de los 5 pilares DPO: Seguridad, Calidad, Costos, Servicio y Personas.',
-    createdBy: 'Ing. Carlos Restrepo',
-    createdAt: '2026-10-09T07:45:00Z',
+    date: '2026-10-11',
+    scheduledStartTime: '06:15',
+    actualStartTime: '06:15',
+    centerId: 'cd-popayan',
+    activityType: 'Matinal',
+    topic: 'Matinal Operativa DPO: Control de alcoholimetría y seguridad en variante Popayán',
+    facilitator: 'José Daniel Palacios',
+    generalNotes: 'Pruebas de alcoholemia al 100% de la flota antes del despacho.',
+    createdBy: 'José Daniel Palacios',
+    createdAt: '2026-10-11T06:45:00Z',
     attendees: [
-      { id: 'att-3-1', employeeCode: '1144023941', name: 'Carlos Alberto Mendoza', cargo: 'Conductor', status: 'Asistió', arrivalTime: '06:00', observations: 'Líder conductor' },
-      { id: 'att-3-2', employeeCode: '1130654210', name: 'Andrés Felipe Rincón', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '06:05', observations: 'Líder RR' },
-      { id: 'att-3-3', employeeCode: '31985472', name: 'Diana Marcela Gómez', cargo: 'Administrativo', status: 'Asistió', arrivalTime: '05:55', observations: 'Presentación de KPI' },
-      { id: 'att-3-4', employeeCode: '1144321980', name: 'José Daniel Palacios', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '06:10', observations: 'Aporte en ruta sur' },
+      { id: 'att-3-1', employeeCode: '1112456789', name: 'Víctor Manuel Quintero', cargo: 'Conductor', status: 'Asistió', arrivalTime: '06:10', observations: 'Todo conforme' },
+      { id: 'att-3-2', employeeCode: '1144321980', name: 'José Daniel Palacios', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '06:05', observations: 'Supervisor a cargo' },
+      { id: 'att-3-3', employeeCode: '1098654321', name: 'Sandra Milena Villamizar', cargo: 'Administrativo', status: 'Asistió', arrivalTime: '06:12', observations: 'Registro DPO' },
     ],
   },
   {
     id: 'act-4',
-    date: '2026-10-08',
-    scheduledStartTime: '06:15',
-    actualStartTime: '06:15',
-    centerId: 'cd-bucaramanga',
+    date: '2026-10-10',
+    scheduledStartTime: '06:00',
+    actualStartTime: '06:06',
+    centerId: 'cd-tulua',
     activityType: 'Matinal',
-    topic: 'Matinal de Seguridad Vial y Chequeo Pre-operacional de Frenos y Luces',
+    topic: 'Matinal Operativa DPO: Protocolo de entrega segura y cero accidentes en ruta Tuluá-Buga',
     facilitator: 'Jorge Iván Cárdenas',
-    generalNotes: 'Revisión exhaustiva con supervisor de patio.',
+    generalNotes: 'Recordatorio de no utilizar celulares mientras se conduce ni en maniobras de reversa.',
     createdBy: 'Jorge Iván Cárdenas',
-    createdAt: '2026-10-08T06:50:00Z',
+    createdAt: '2026-10-10T06:30:00Z',
     attendees: [
-      { id: 'att-4-1', employeeCode: '1098765432', name: 'Jorge Iván Cárdenas', cargo: 'Conductor', status: 'Asistió', arrivalTime: '06:10', observations: 'Todo conforme' },
-      { id: 'att-4-2', employeeCode: '1098654321', name: 'Sandra Milena Villamizar', cargo: 'Administrativo', status: 'Asistió', arrivalTime: '06:12', observations: 'Registro DPO' },
-    ],
-  },
-  {
-    id: 'act-5',
-    date: '2026-10-07',
-    scheduledStartTime: '14:00',
-    actualStartTime: '14:05',
-    centerId: 'cd-tocancipa',
-    activityType: 'Capacitación',
-    topic: 'Capacitación: Manejo de Sustancias Peligrosas y Amoniaco en Planta y CD',
-    facilitator: 'Wilson David Beltrán',
-    generalNotes: 'Simulacro de evacuación y uso de máscara para amoniaco.',
-    createdBy: 'Wilson David Beltrán',
-    createdAt: '2026-10-07T15:30:00Z',
-    attendees: [
-      { id: 'att-5-1', employeeCode: '1030405060', name: 'Wilson David Beltrán', cargo: 'Conductor', status: 'Asistió', arrivalTime: '13:55', observations: 'Práctica OK' },
-      { id: 'att-5-2', employeeCode: '1020304050', name: 'Yeison Alirio Parra', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '13:58', observations: 'Evaluación 10/10' },
+      { id: 'att-4-1', employeeCode: '1098765432', name: 'Jorge Iván Cárdenas', cargo: 'Conductor', status: 'Asistió', arrivalTime: '05:54', observations: 'Puntual' },
+      { id: 'att-4-2', employeeCode: '1020304050', name: 'Yeison Alirio Parra', cargo: 'Responsable de Ruta (RR)', status: 'Asistió', arrivalTime: '05:58', observations: 'Puntual' },
+      { id: 'att-4-3', employeeCode: '1030405060', name: 'Wilson David Beltrán', cargo: 'Conductor', status: 'Asistió', arrivalTime: '06:03', observations: 'Inspección OK' },
     ],
   },
 ];
@@ -255,7 +210,9 @@ class StorageService {
   // Centros de Distribución
   getCenters(): DistributionCenter[] {
     const centers = this.getStorageItem<DistributionCenter[]>(STORAGE_KEYS.CENTERS, []);
-    if (!centers || centers.length === 0) {
+    const validIds = ['cd-popayan', 'cd-cali', 'cd-tulua', 'cd-yumbo'];
+    const isValid = Array.isArray(centers) && centers.length === 4 && centers.every(c => validIds.includes(c.id));
+    if (!isValid) {
       this.setStorageItem(STORAGE_KEYS.CENTERS, DEFAULT_CENTERS);
       return DEFAULT_CENTERS;
     }
@@ -279,6 +236,27 @@ class StorageService {
     if (!activities || activities.length === 0) {
       this.setStorageItem(STORAGE_KEYS.ACTIVITIES, INITIAL_ACTIVITIES);
       return INITIAL_ACTIVITIES;
+    }
+    const validIds = new Set(['cd-popayan', 'cd-cali', 'cd-tulua', 'cd-yumbo']);
+    const legacyMap: Record<string, string> = {
+      'cd-valle': 'cd-yumbo',
+      'cd-tocancipa': 'cd-popayan',
+      'cd-bucaramanga': 'cd-tulua',
+      'cd-barranquilla': 'cd-cali',
+      'cd-medellin': 'cd-cali',
+      'cd-bogota-fon': 'cd-yumbo',
+    };
+    let hasChanges = false;
+    const normalized = activities.map((act) => {
+      if (!validIds.has(act.centerId)) {
+        hasChanges = true;
+        return { ...act, centerId: legacyMap[act.centerId] || 'cd-cali' };
+      }
+      return act;
+    });
+    if (hasChanges) {
+      this.setStorageItem(STORAGE_KEYS.ACTIVITIES, normalized);
+      return normalized;
     }
     return activities;
   }
@@ -333,6 +311,27 @@ class StorageService {
     if (!employees || employees.length === 0) {
       this.setStorageItem(STORAGE_KEYS.EMPLOYEES, INITIAL_EMPLOYEES);
       return INITIAL_EMPLOYEES;
+    }
+    const validIds = new Set(['cd-popayan', 'cd-cali', 'cd-tulua', 'cd-yumbo']);
+    const legacyMap: Record<string, string> = {
+      'cd-valle': 'cd-yumbo',
+      'cd-tocancipa': 'cd-popayan',
+      'cd-bucaramanga': 'cd-tulua',
+      'cd-barranquilla': 'cd-cali',
+      'cd-medellin': 'cd-cali',
+      'cd-bogota-fon': 'cd-yumbo',
+    };
+    let hasChanges = false;
+    const normalized = employees.map((emp) => {
+      if (!validIds.has(emp.centerId)) {
+        hasChanges = true;
+        return { ...emp, centerId: legacyMap[emp.centerId] || 'cd-cali' };
+      }
+      return emp;
+    });
+    if (hasChanges) {
+      this.setStorageItem(STORAGE_KEYS.EMPLOYEES, normalized);
+      return normalized;
     }
     return employees;
   }
@@ -548,6 +547,21 @@ class StorageService {
     this.setStorageItem(STORAGE_KEYS.CENTERS, DEFAULT_CENTERS);
     this.setStorageItem(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
     this.setStorageItem(STORAGE_KEYS.CURRENT_USER, DEFAULT_USERS[0]);
+  }
+
+  // Logo personalizado
+  getCustomLogo(): string | null {
+    return this.getStorageItem<string | null>(STORAGE_KEYS.CUSTOM_LOGO, null);
+  }
+
+  setCustomLogo(logoDataUrl: string | null): void {
+    if (logoDataUrl) {
+      this.setStorageItem(STORAGE_KEYS.CUSTOM_LOGO, logoDataUrl);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.CUSTOM_LOGO);
+    }
+    // Disparar evento para sincronizar todos los componentes inmediatamente
+    window.dispatchEvent(new CustomEvent('bavaria_logo_updated', { detail: logoDataUrl }));
   }
 
   // Exportar todo el backup JSON

@@ -42,8 +42,14 @@ export const PublicAttendancePortal: React.FC<PublicAttendancePortalProps> = ({
   onOpenLogin,
 }) => {
   const [selectedCenterId, setSelectedCenterId] = useState<string>(
-    centers[0]?.id || 'cd-valle'
+    centers[0]?.id || 'cd-cali'
   );
+
+  useEffect(() => {
+    if (centers.length > 0 && !centers.some((c) => c.id === selectedCenterId)) {
+      setSelectedCenterId(centers[0].id);
+    }
+  }, [centers, selectedCenterId]);
 
   // Form State
   const [cedula, setCedula] = useState<string>('');
@@ -146,18 +152,7 @@ export const PublicAttendancePortal: React.FC<PublicAttendancePortalProps> = ({
     setResultState(null);
   };
 
-  const handleQuickKeypad = (digit: string) => {
-    if (digit === 'DEL') {
-      setCedula((prev) => prev.slice(0, -1));
-    } else if (digit === 'CLR') {
-      setCedula('');
-      setFullName('');
-    } else {
-      if (cedula.length < 12) {
-        setCedula((prev) => prev + digit);
-      }
-    }
-  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -428,149 +423,181 @@ export const PublicAttendancePortal: React.FC<PublicAttendancePortalProps> = ({
           </div>
         )}
 
-        {/* FORMULARIO PRINCIPAL */}
+        {/* FORMULARIO PRINCIPAL - REDISEÑO MODERNO Y ELEGANTE */}
         {(!resultState || resultState.type === 'error') && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-md space-y-6"
+            className="bg-white rounded-3xl border border-slate-200/80 shadow-xl overflow-hidden transition-all"
           >
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-base font-bold text-[#0B2D4A]">
-                1. Digita tu Número de Cédula
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Al ingresar tu documento, el sistema reconocerá tu nombre automáticamente si estás en la base de {selectedCenter.name}.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-              {/* Cédula y Teclado Numérico */}
-              <div className="md:col-span-7 space-y-4">
+            {/* Form Header Banner */}
+            <div className="bg-gradient-to-r from-[#0B2D4A] to-[#173F60] p-6 sm:p-8 text-white relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl pointer-events-none -mr-20 -mt-20" />
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Número de Cédula de Ciudadanía <span className="text-rose-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <IdCard className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      required
-                      autoFocus
-                      value={cedula}
-                      onChange={(e) => setCedula(e.target.value.replace(/\D/g, ''))}
-                      placeholder="Ej: 1144023941"
-                      className="w-full pl-11 pr-4 py-3 text-lg font-bold font-mono rounded-xl border-2 border-slate-300 focus:border-[#0B2D4A] focus:outline-none tracking-wide text-slate-900 bg-slate-50/50 focus:bg-white transition-colors"
-                    />
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#CDA323]/20 border border-[#CDA323]/30 text-[#CDA323] text-xs font-bold tracking-wider uppercase mb-2">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Portal Oficial de Registro DPO
                   </div>
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                    Control de Asistencia Matinal
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1">
+                    Centro seleccionado: <span className="text-[#CDA323] font-bold">{selectedCenter.name}</span>
+                  </p>
                 </div>
-
-                {/* Reconocimiento Inteligente de Nómina */}
-                {matchedEmployee ? (
-                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">
-                        Colaborador Identificado
-                      </span>
-                      <strong className="text-sm font-black text-emerald-950">
-                        {matchedEmployee.name}
-                      </strong>
-                      <div className="text-emerald-700 text-[11px] mt-0.5">
-                        Cargo en sistema: {matchedEmployee.cargo}
-                      </div>
-                    </div>
-                    <UserCheck className="w-6 h-6 text-emerald-600 shrink-0" />
-                  </div>
-                ) : cedula.length >= 6 ? (
-                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-                    <span className="text-[11px] font-semibold text-slate-600 block">
-                      ¿Primera vez registrándote con esta cédula? Digita tu nombre:
-                    </span>
-                    <input
-                      type="text"
-                      required
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Tu Nombre y Apellidos completos"
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold focus:outline-none focus:border-[#0B2D4A]"
-                    />
-                  </div>
-                ) : null}
-
-                {/* Teclado numérico táctil */}
-                <div className="pt-2">
-                  <span className="text-[11px] font-semibold text-slate-400 block mb-1.5">
-                    Teclado táctil:
-                  </span>
-                  <div className="grid grid-cols-3 gap-2">
-                    {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'CLR', '0', 'DEL'].map((k) => (
-                      <button
-                        key={k}
-                        type="button"
-                        onClick={() => handleQuickKeypad(k)}
-                        className={`py-3 rounded-lg font-bold text-sm transition-colors ${
-                          k === 'DEL' || k === 'CLR'
-                            ? 'bg-slate-200 text-slate-700 hover:bg-slate-300 text-xs'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-900 font-mono shadow-2xs'
-                        }`}
-                      >
-                        {k === 'DEL' ? 'Borrar' : k === 'CLR' ? 'Limpiar' : k}
-                      </button>
-                    ))}
+                <div className="bg-[#173F60]/80 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 flex items-center gap-3 shrink-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <div className="text-xs font-mono font-bold text-white tabular-nums">
+                    {currentTime || '06:00:00'}
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Selección de Cargo y Botón de Envío */}
-              <div className="md:col-span-5 space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    2. Selecciona tu Cargo <span className="text-rose-500">*</span>
-                  </label>
+            {/* Form Body */}
+            <div className="p-6 sm:p-8 space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* Columna Izquierda: Cédula y Reconocimiento */}
+                <div className="lg:col-span-6 space-y-6">
                   <div className="space-y-2">
-                    {cargoOptions.map((opt) => {
-                      const Icon = opt.icon;
-                      const isSelected = cargo === opt.value;
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => setCargo(opt.value)}
-                          className={`w-full p-3 rounded-xl border text-left flex items-center gap-3 transition-all ${
-                            isSelected
-                              ? 'bg-[#0B2D4A] text-white border-[#0B2D4A] shadow-md ring-2 ring-[#CDA323]/50'
-                              : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                          }`}
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                              isSelected ? 'bg-[#CDA323] text-[#0B2D4A]' : 'bg-slate-200 text-slate-600'
+                    <label className="flex items-center justify-between text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                      <span className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-lg bg-[#0B2D4A] text-white flex items-center justify-center text-xs">1</span>
+                        Número de Cédula
+                      </span>
+                      <span className="text-rose-500 font-normal">Obligatorio *</span>
+                    </label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0B2D4A] transition-colors">
+                        <IdCard className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        required
+                        autoFocus
+                        value={cedula}
+                        onChange={(e) => setCedula(e.target.value.replace(/\D/g, ''))}
+                        placeholder="Ej: 1144023941"
+                        className="w-full pl-12 pr-4 py-4 text-xl font-black font-mono rounded-2xl border-2 border-slate-200 bg-slate-50/50 text-slate-900 placeholder:text-slate-400 placeholder:font-normal placeholder:text-base focus:border-[#0B2D4A] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#0B2D4A]/10 transition-all shadow-xs"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      Digita tu número de documento sin puntos ni espacios.
+                    </p>
+                  </div>
+
+                  {/* Tarjeta de Identificación Inteligente */}
+                  {matchedEmployee ? (
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50/50 border-2 border-emerald-300/80 shadow-sm space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-200/70 text-emerald-900 text-[10px] font-black uppercase tracking-wider">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                          Colaborador Reconocido
+                        </span>
+                        <UserCheck className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black text-emerald-950">
+                          {matchedEmployee.name}
+                        </h4>
+                        <p className="text-xs text-emerald-800 mt-0.5">
+                          Cargo asignado en sistema: <strong className="font-bold">{matchedEmployee.cargo}</strong>
+                        </p>
+                      </div>
+                    </div>
+                  ) : cedula.length >= 6 ? (
+                    <div className="p-5 rounded-2xl bg-amber-50/70 border-2 border-amber-200 shadow-sm space-y-3 animate-in fade-in duration-200">
+                      <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
+                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>Registro nuevo detectado. Ingresa tu nombre completo:</span>
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Nombres y Apellidos completos"
+                        className="w-full px-4 py-3 rounded-xl border border-amber-300 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:border-[#0B2D4A] focus:ring-2 focus:ring-amber-500/20"
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 text-xs flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-slate-200 flex items-center justify-center text-slate-600 font-bold shrink-0">
+                        i
+                      </div>
+                      <p>
+                        El sistema buscará automáticamente tus datos al completar el número de cédula.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Columna Derecha: Selección de Cargo y Botón */}
+                <div className="lg:col-span-6 space-y-6">
+                  <div className="space-y-3">
+                    <label className="flex items-center justify-between text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                      <span className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-lg bg-[#0B2D4A] text-white flex items-center justify-center text-xs">2</span>
+                        Selecciona tu Cargo
+                      </span>
+                      <span className="text-rose-500 font-normal">Obligatorio *</span>
+                    </label>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {cargoOptions.map((opt) => {
+                        const Icon = opt.icon;
+                        const isSelected = cargo === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setCargo(opt.value)}
+                            className={`p-3.5 rounded-2xl border-2 text-left flex flex-col justify-between gap-3 transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#0B2D4A] text-white border-[#0B2D4A] shadow-lg ring-4 ring-[#CDA323]/20 scale-[1.02]'
+                                : 'bg-slate-50/80 hover:bg-slate-100/80 text-slate-800 border-slate-200 hover:border-slate-300'
                             }`}
                           >
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <span className="text-xs font-bold truncate">{opt.label}</span>
-                        </button>
-                      );
-                    })}
+                            <div className="flex items-center justify-between w-full">
+                              <div
+                                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                                  isSelected ? 'bg-[#CDA323] text-[#0B2D4A]' : 'bg-white text-slate-700 border border-slate-200'
+                                }`}
+                              >
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                isSelected ? 'border-[#CDA323] bg-[#CDA323] text-[#0B2D4A]' : 'border-slate-300 bg-white'
+                              }`}>
+                                {isSelected && <CheckCircle2 className="w-3.5 h-3.5 fill-[#0B2D4A] text-white" />}
+                              </div>
+                            </div>
+                            <span className="text-xs font-black tracking-tight">{opt.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Botón de Envío Oficial */}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      className="w-full py-4 px-6 bg-gradient-to-r from-[#CDA323] to-[#b8911d] hover:from-[#b8911d] hover:to-[#a37f17] text-[#0B2D4A] font-black text-sm rounded-2xl shadow-xl transition-all transform active:scale-[0.99] flex flex-col items-center justify-center gap-1 cursor-pointer border border-[#c4981a]"
+                    >
+                      <span className="flex items-center gap-2.5 text-base tracking-wide">
+                        <CheckCircle2 className="w-5 h-5" />
+                        REGISTRAR MI ASISTENCIA
+                      </span>
+                      <span className="text-[11px] font-bold text-[#0B2D4A]/90 font-mono tracking-wider">
+                        Sello horario automático: {currentTime || '06:00:00'}
+                      </span>
+                    </button>
                   </div>
                 </div>
 
-                {/* Botón de Envío con Estampado Automático de Hora */}
-                <div className="pt-4">
-                  <button
-                    type="submit"
-                    className="w-full py-4 px-4 bg-[#CDA323] hover:bg-[#b8911d] text-[#0B2D4A] font-black text-sm rounded-xl shadow-lg transition-all transform active:scale-98 flex flex-col items-center justify-center gap-0.5 cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5" />
-                      REGISTRAR MI ASISTENCIA
-                    </span>
-                    <span className="text-[11px] font-semibold text-[#0B2D4A]/80 font-mono">
-                      Hora automática del reloj: {currentTime || 'Ahora'}
-                    </span>
-                  </button>
-                </div>
               </div>
             </div>
           </form>

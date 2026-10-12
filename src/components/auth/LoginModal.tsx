@@ -56,7 +56,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         {/* Encabezado Corporativo Bavaria */}
         <div className="bg-[#0B2D4A] text-white p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <BavariaLogo className="h-8" />
+            <BavariaLogo className="h-8" allowEdit={false} />
           </div>
           <button
             onClick={onClose}

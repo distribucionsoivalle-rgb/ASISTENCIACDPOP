@@ -62,7 +62,7 @@ export const PrintTemplate: React.FC<PrintTemplateProps> = ({
         {/* Encabezado Oficial Bavaria */}
         <div className="border-b-2 border-[#0B2D4A] pb-4 mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <BavariaLogo className="h-10" />
+            <BavariaLogo className="h-10" allowEdit={false} variant="dark" />
           </div>
 
           <div className="text-right">

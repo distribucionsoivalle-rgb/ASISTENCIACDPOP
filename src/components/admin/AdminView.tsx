@@ -24,7 +24,11 @@ import {
   Shield,
   HelpCircle,
   X,
+  Image as ImageIcon,
 } from 'lucide-react';
+import { LogoModal } from '../common/LogoModal';
+import { BavariaLogo } from '../common/BavariaLogo';
+import { SupabaseSettingsCard } from './SupabaseSettingsCard';
 
 interface AdminViewProps {
   currentUser: User;
@@ -56,6 +60,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [empCargo, setEmpCargo] = useState<Cargo>('Conductor');
   const [empCenterId, setEmpCenterId] = useState(centers[0]?.id || '');
   const [empPhone, setEmpPhone] = useState('');
+  const [logoModalOpen, setLogoModalOpen] = useState(false);
 
   // Notificaciones
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -442,22 +447,54 @@ export const AdminView: React.FC<AdminViewProps> = ({
               />
             </div>
           </div>
+
+          {/* Identidad de Marca y Logo Bavaria */}
+          <div className="pt-4 border-t border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-xs">
+                  <BavariaLogo showSubtitle={false} allowEdit={false} variant="dark" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#0B2D4A] text-sm flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-[#EE2722]" />
+                    Logotipo Oficial Bavaria
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Cambia la imagen del logo cargando tu archivo (PNG, JPG, SVG) o usando el logo oficial vectorial.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setLogoModalOpen(true)}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#EE2722] hover:bg-[#D51E28] text-white font-bold rounded-lg text-xs shadow-xs transition-colors shrink-0"
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                Cambiar / Subir Logo
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* PESTAÑA 3: Base de Datos y Respaldos */}
       {activeTab === 'backup' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5 space-y-5 text-xs">
-          <div>
-            <h3 className="text-sm font-bold text-[#0B2D4A] mb-1">
-              Persistencia y Copias de Seguridad
-            </h3>
-            <p className="text-slate-500">
-              Exporta los registros completos para salvaguarda de auditoría o restaura un respaldo en cualquier momento.
-            </p>
-          </div>
+        <div className="space-y-6">
+          <SupabaseSettingsCard onNotification={showNotification} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5 space-y-5 text-xs">
+            <div>
+              <h3 className="text-sm font-bold text-[#0B2D4A] mb-1">
+                Persistencia y Copias de Seguridad
+              </h3>
+              <p className="text-slate-500">
+                Exporta los registros completos para salvaguarda de auditoría o restaura un respaldo en cualquier momento.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
             {/* Exportar JSON */}
             <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
               <div>
@@ -524,6 +561,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
             </div>
           </div>
         </div>
+      </div>
       )}
 
       {/* Modal Crear / Editar Colaborador */}
@@ -639,6 +677,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Modal para Personalizar / Cargar Logo */}
+      <LogoModal
+        isOpen={logoModalOpen}
+        onClose={() => setLogoModalOpen(false)}
+        currentLogo={storage.getCustomLogo()}
+        onLogoChanged={() => onRefreshData()}
+      />
     </div>
   );
 };
