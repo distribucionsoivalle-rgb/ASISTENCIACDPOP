@@ -707,95 +707,106 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* Resumen de Actividades Recientes en el Período */}
+      {/* Resumen Completo de Actividades y Registros Guardados Cada Día */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[#0B2D4A]">
-            Últimas Actividades Registradas
-          </h3>
-          <span className="text-xs text-slate-500 tabular-nums">
-            Mostrando {filteredActivities.slice(0, 5).length} de {filteredActivities.length} actividades
+        <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-bold text-[#0B2D4A]">
+              Registro Diario Consolidado (Lo que se guarda cada día en el sistema)
+            </h3>
+            <p className="text-xs text-slate-500">
+              Historial completo de matinales registradas, asistencia de colaboradores y puntualidad en los Centros de Distribución.
+            </p>
+          </div>
+          <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold tabular-nums shrink-0">
+            Total registros: {filteredActivities.length}
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
-                <th className="py-2.5 px-4">Fecha</th>
-                <th className="py-2.5 px-3">Horario</th>
-                <th className="py-2.5 px-3">CD</th>
-                <th className="py-2.5 px-3">Tipo</th>
-                <th className="py-2.5 px-4">Tema Tratado</th>
-                <th className="py-2.5 px-3">Facilitador</th>
-                <th className="py-2.5 px-3 text-center">Asistentes</th>
-                <th className="py-2.5 px-3 text-center">% Asistencia</th>
-                <th className="py-2.5 px-4 text-right">Acción</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredActivities.slice(0, 5).map((act) => {
-                const total = act.attendees.length;
-                const asistieron = act.attendees.filter((a) => a.status === 'Asistió').length;
-                const justificados = act.attendees.filter((a) => a.status === 'Justificado').length;
-                const denom = settings.excludeJustifiedFromPercentage
-                  ? Math.max(0, total - justificados)
-                  : total;
-                const pct = denom > 0 ? Math.round((asistieron / denom) * 100) : 0;
-                const centerName = centers.find((c) => c.id === act.centerId)?.name || act.centerId;
+        {filteredActivities.length === 0 ? (
+          <div className="text-center py-12 text-xs text-slate-400">
+            No hay registros almacenados para los filtros seleccionados. Realiza un nuevo registro de matinal para verlo reflejado aquí en tiempo real.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+                  <th className="py-2.5 px-4">Fecha de Registro</th>
+                  <th className="py-2.5 px-3">Horario (Prog → Real)</th>
+                  <th className="py-2.5 px-3">Centro de Distribución</th>
+                  <th className="py-2.5 px-3">Tipo</th>
+                  <th className="py-2.5 px-4">Tema / Novedad</th>
+                  <th className="py-2.5 px-3">Facilitador</th>
+                  <th className="py-2.5 px-3 text-center">Asistencia</th>
+                  <th className="py-2.5 px-3 text-center">% Asistencia</th>
+                  <th className="py-2.5 px-4 text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredActivities.map((act) => {
+                  const total = act.attendees.length;
+                  const asistieron = act.attendees.filter((a) => a.status === 'Asistió').length;
+                  const justificados = act.attendees.filter((a) => a.status === 'Justificado').length;
+                  const denom = settings.excludeJustifiedFromPercentage
+                    ? Math.max(0, total - justificados)
+                    : total;
+                  const pct = denom > 0 ? Math.round((asistieron / denom) * 100) : 0;
+                  const centerName = centers.find((c) => c.id === act.centerId)?.name || act.centerId;
 
-                return (
-                  <tr key={act.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3 px-4 font-semibold text-slate-800 whitespace-nowrap tabular-nums">
-                      {formatDateColombia(act.date)}
-                    </td>
-                    <td className="py-3 px-3 text-slate-600 whitespace-nowrap tabular-nums">
-                      {act.scheduledStartTime} → {act.actualStartTime}
-                    </td>
-                    <td className="py-3 px-3 text-slate-700 whitespace-nowrap">
-                      {centerName}
-                    </td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      <span className="font-semibold px-2 py-0.5 rounded text-[11px] bg-slate-100 text-slate-700">
-                        {act.activityType}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-800 font-medium max-w-xs truncate">
-                      {act.topic}
-                    </td>
-                    <td className="py-3 px-3 text-slate-600 whitespace-nowrap">
-                      {act.facilitator}
-                    </td>
-                    <td className="py-3 px-3 text-center text-slate-700 font-medium tabular-nums">
-                      {asistieron}/{total}
-                    </td>
-                    <td className="py-3 px-3 text-center tabular-nums">
-                      <span
-                        className={`font-bold px-1.5 py-0.5 rounded text-[11px] ${
-                          pct >= 95
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : pct >= 80
-                            ? 'bg-amber-50 text-amber-700'
-                            : 'bg-rose-50 text-rose-700'
-                        }`}
-                      >
-                        {pct}%
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => onViewActivityDetail(act)}
-                        className="text-xs font-semibold text-[#0B2D4A] hover:text-[#CDA323] transition-colors"
-                      >
-                        Ver detalle →
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                  return (
+                    <tr key={act.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3 px-4 font-bold text-slate-800 whitespace-nowrap tabular-nums">
+                        {formatDateColombia(act.date)}
+                      </td>
+                      <td className="py-3 px-3 text-slate-600 whitespace-nowrap tabular-nums font-mono text-[11px]">
+                        {act.scheduledStartTime} → {act.actualStartTime}
+                      </td>
+                      <td className="py-3 px-3 text-slate-700 whitespace-nowrap font-medium">
+                        {centerName}
+                      </td>
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        <span className="font-semibold px-2 py-0.5 rounded text-[11px] bg-slate-100 text-slate-700">
+                          {act.activityType}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-800 font-medium max-w-xs truncate">
+                        {act.topic}
+                      </td>
+                      <td className="py-3 px-3 text-slate-600 whitespace-nowrap">
+                        {act.facilitator}
+                      </td>
+                      <td className="py-3 px-3 text-center text-slate-700 font-medium tabular-nums">
+                        {asistieron} / {total}
+                      </td>
+                      <td className="py-3 px-3 text-center tabular-nums">
+                        <span
+                          className={`font-bold px-2 py-0.5 rounded text-[11px] ${
+                            pct >= 95
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : pct >= 80
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-rose-50 text-rose-700 border border-rose-200'
+                          }`}
+                        >
+                          {pct}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => onViewActivityDetail(act)}
+                          className="px-2.5 py-1 rounded bg-[#0B2D4A] hover:bg-[#173F60] text-white font-semibold transition-colors shadow-xs"
+                        >
+                          Ver Detalle Guardado
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

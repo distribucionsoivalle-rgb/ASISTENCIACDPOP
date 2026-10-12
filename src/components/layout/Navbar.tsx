@@ -122,38 +122,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 </div>
 
-                <div className="py-1">
-                  <p className="px-3.5 pt-2 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Cambiar Perfil de Usuario (Demostración de Permisos)
-                  </p>
-                  {DEFAULT_USERS.map((u) => {
-                    const isSelected = u.id === currentUser.id;
-                    return (
-                      <button
-                        key={u.id}
-                        onClick={() => {
-                          onUserChange(u);
-                          setUserDropdownOpen(false);
-                        }}
-                        className={`w-full px-3.5 py-2 text-left flex items-start justify-between gap-2 text-xs transition-colors hover:bg-slate-50 ${
-                          isSelected ? 'bg-amber-50/70 text-[#0B2D4A]' : 'text-slate-700'
-                        }`}
-                      >
-                        <div>
-                          <p className="font-semibold">{u.name}</p>
-                          <p className="text-[11px] text-slate-500">{u.roleTitle}</p>
-                          <p className="text-[10px] text-slate-400 font-mono">{u.email}</p>
-                        </div>
-                        {isSelected && (
-                          <Check className="w-4 h-4 text-[#CDA323] shrink-0 mt-0.5" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="px-3.5 pt-2 border-t border-slate-100 text-[10px] text-slate-400">
-                  Auditoría DPO: Las acciones registradas se asocian al usuario seleccionado.
+                <div className="px-3.5 py-2 border-t border-slate-100 text-[10px] text-slate-400">
+                  Usuario Administrador Verificado (Cédula: 1059237194)
                 </div>
 
                 <div className="pt-2 px-2 border-t border-slate-100 mt-2">

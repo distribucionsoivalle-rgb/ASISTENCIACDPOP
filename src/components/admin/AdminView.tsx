@@ -167,6 +167,14 @@ export const AdminView: React.FC<AdminViewProps> = ({
     }
   };
 
+  const handleClearAllData = () => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar todos los registros (matinales y compromisos) para empezar con datos reales limpios?')) {
+      storage.clearAllData();
+      onRefreshData();
+      showNotification('success', 'Todos los datos demo han sido eliminados. El sistema está limpio para datos reales.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Cabecera */}
@@ -548,7 +556,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   Cargar Datos de Demostración
                 </h4>
                 <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Restablece el catálogo con 5 actividades reales, 15 colaboradores y compromisos DPO iniciales.
+                  Restablece el catálogo con actividades y compromisos de prueba.
                 </p>
               </div>
 
@@ -557,6 +565,26 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 className="mt-4 w-full py-2 bg-[#CDA323] hover:bg-[#b8911d] text-[#0B2D4A] font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5"
               >
                 Restaurar Catálogo Demo
+              </button>
+            </div>
+
+            {/* Eliminar Todo / Vaciar */}
+            <div className="p-4 rounded-xl border border-rose-200 bg-rose-50 flex flex-col justify-between">
+              <div>
+                <h4 className="font-bold text-rose-800 mb-1 flex items-center gap-1.5">
+                  <Trash2 className="w-4 h-4 text-rose-600" />
+                  Eliminar Datos Demo / Vaciar
+                </h4>
+                <p className="text-[11px] text-slate-700 leading-relaxed">
+                  Borra todos los registros y actividades para empezar a trabajar 100% con datos reales.
+                </p>
+              </div>
+
+              <button
+                onClick={handleClearAllData}
+                className="mt-4 w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5"
+              >
+                Eliminar Todo y Dejar Vacío
               </button>
             </div>
           </div>

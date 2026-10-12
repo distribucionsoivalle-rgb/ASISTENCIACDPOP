@@ -15,8 +15,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onClose,
   onLoginSuccess,
 }) => {
-  const [email, setEmail] = useState<string>('distribucionsoivalle@gmail.com');
-  const [password, setPassword] = useState<string>('admin123');
+  const [email, setEmail] = useState<string>('1059237194');
+  const [password, setPassword] = useState<string>('1059237194');
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -25,19 +25,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     e.preventDefault();
     setError(null);
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanInput = email.trim();
     const user = DEFAULT_USERS.find(
-      (u) => u.email.toLowerCase() === cleanEmail
+      (u) => u.email.toLowerCase() === cleanInput.toLowerCase() || u.id === cleanInput
     );
 
     if (!user) {
-      setError('Credenciales inválidas. Verifica el correo institucional.');
+      setError('Usuario administrador 1059237194 no encontrado.');
       return;
     }
 
-    // Acepta password de prueba o cualquier contraseña de al menos 4 caracteres para facilitar acceso
-    if (!password || password.length < 4) {
-      setError('Por favor ingresa tu contraseña institucional (mínimo 4 caracteres).');
+    if (password !== '1059237194') {
+      setError('Contraseña incorrecta. Utilice 1059237194.');
       return;
     }
 
@@ -90,16 +89,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
             <div>
               <label className="block font-bold text-slate-700 mb-1">
-                Correo Electrónico Institucional
+                Usuario o Correo (ej. 1059237194)
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="usuario@bavaria.co"
+                  placeholder="1059237194 o correo"
                   className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-[#0B2D4A] font-medium"
                 />
               </div>
